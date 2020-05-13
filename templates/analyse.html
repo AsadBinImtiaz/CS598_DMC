@@ -1,0 +1,144 @@
+{% extends "main.html" %}
+{% block body %}
+			<div id="contentdiv" style="margin-right: 40px">
+				<br/>
+				<table style="width: 100%">
+					<td style="width:50px"> </td>
+					<td>
+						<table>
+							<tr>
+								<p>Choose a review:</p>
+							</tr>
+							<tr>
+								<form action="analyse" method = "post">
+									<label class="w3-center">State: </label>
+									<select id="state" class="w3-button" style="border: double; width: 8%">
+										<option>{{state|safe}}</option/>
+									</select>
+									&nbsp;&nbsp;
+									<label class="w3-center"> City: </label>
+									<select id="city" class="w3-button" style="border: double; width: 15%">
+										<option>{{city|safe}}</option/>
+									</select>
+									&nbsp;&nbsp;
+									<label class="w3-center"> Restaurant: </label>
+									<select id="rest" class="w3-button" style="border: double; width: 20%">
+										<option>{{rest|safe}}</option/>
+									</select>
+									&nbsp;&nbsp;
+									<label class="w3-center"> Review ID: </label>
+									<select id="revw" class="w3-button" style="border: double; width: 20%">
+										<option>{{revw|safe}}</option/>
+									</select>
+									&nbsp;&nbsp;
+									<div style="height: 20px">
+										<br/>
+									</div>
+									<button type="submit" class="w3-button w3-black" value = "submit">Analyze</button>
+									<input type="hidden" placeholder="inpts" id="inpts" name ="inpts" ></input> 
+								</form>
+							</tr>
+						</table>
+						</br>
+						<div id="div_res" style="position:relative"><span>{{result|safe}}</span><div>
+					</td>
+					<td style="width:1px"> </td>
+				</table>
+				<br/>
+				<script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
+				<script>
+					"use strict";
+
+					var states = {{ states|tojson }};
+					console.log(states)
+                    
+					var form = $('form');
+					var state = $('select#state');
+					var city = $('select#city');
+					var rest = $('select#rest');
+					var revw = $('select#revw');
+					var inpt = $('input#inpts');
+					
+					if (typeof state != "undefined")  {
+                        console.log(state.val()) 
+                    }
+                    if (typeof revw != "undefined")  {
+                        
+                        var citys = states[state.val()];
+                        if (typeof citys != "undefined")  {
+                            for (var key in citys) {
+                                city.append($('<option/>', {'value': key, 'text': key}));
+            				}
+            						
+						    var rests = citys[city.val()];
+						    if (typeof rests != "undefined")  {
+						        for (var key in rests) {
+            						rest.append($('<option/>', {'value': key, 'text': key}));
+            					}
+    						    var revws = rests[rest.val()];
+    						    
+    						    if (typeof rests != "undefined")  {
+    							
+            						for (var i in revws) {
+            							revw.append($('<option/>', {'value': revws[i], 'text': revws[i]}));
+            						}
+            					}
+        					}
+					    }
+                    }
+                    
+					for (var key in states) {
+						state.append($('<option/>', {'value': key, 'text': key}));
+					}
+										
+					state.change(function(ev) {
+						city.empty();
+						rest.empty();
+						revw.empty();
+						city.append($('<option/>'));
+
+						var citys = states[state.val()];
+
+						for (var key in citys) {
+							city.append($('<option/>', {'value': key, 'text': key}));
+						}
+					});
+					
+					city.change(function(ev) {
+						rest.empty();
+						revw.empty();
+						rest.append($('<option/>'));
+
+						var citys = states[state.val()];
+						var rests = citys[city.val()];
+
+						for (var key in rests) {
+							rest.append($('<option/>', {'value': key, 'text': key}));
+						}
+					});
+
+					rest.change(function(ev) {
+						revw.empty();
+						revw.append($('<option/>'));
+
+						var citys = states[state.val()];
+						var rests = citys[city.val()];
+						var revws = rests[rest.val()];
+
+						for (var i in revws) {
+							revw.append($('<option/>', {'value': revws[i], 'text': revws[i]}));
+						}
+					});
+					
+					revw.change(function(ev) {
+						$(inpts).val($("select#revw option:selected").text()+";"+$("select#rest option:selected").text()+";"+$("select#city option:selected").text()+";"+$("select#state option:selected").text());
+					});
+					
+					form.submit(function(ev) {
+					    $('div#div_res span').html('<br/>Cooking ... <img src="{{ url_for('static', filename='pan.gif') }}" style="width:36px;">');
+						$(inpts).val($("select#revw option:selected").text()+";"+$("select#rest option:selected").text()+";"+$("select#city option:selected").text()+";"+$("select#state option:selected").text());
+					});
+				</script>
+			</div>
+		
+{% endblock %}
