@@ -34,6 +34,9 @@ def get_result_body(rev_text,crf_dict,ner_dict,w2v_dict):
     
 def get_results_body(text):
     
+    global_BL      = load_dish_blacklist()
+    global_WL      = load_dish_whitelist()
+    
     processed_text = pre_process_data(text,lowercase_data=False)
     
     dish_names, dish_dict =find_dishes_with_crf(crf_model,processed_text)
@@ -42,7 +45,7 @@ def get_results_body(text):
     
     crf_dict  = replace_best_matches(dish_dict,prefix="</span><span style='color:#293795'><b>",postfix='</b></span>')
     
-    dish_dict = get_ner_dishes(processed_text,city=city,name=name,blacklist=global_BL,whitelist=dish_names)
+    dish_dict = get_ner_dishes(processed_text,city=city,name=name,blacklist=global_BL,whitelist=dish_names+global_WL)
     
     ner_dict  = replace_best_matches(dish_dict,prefix="</span><span style='color:#293795'><b>",postfix='</b></span><span>')
     
@@ -206,7 +209,7 @@ def get_sent_html(dish_dict):
                                                 </tr>
                                                 """
     if len(sent_dict) == 0:
-        return str_html.replace('<#SENTENCES#>','<i>No dish fount in review text<i>').replace('<#DISHLIST#>','').replace('<#CATEGORY#>','')                                                
+        return str_html.replace('<#SENTENCES#>','<i>No dish found in review text<i>').replace('<#DISHLIST#>','').replace('<#CATEGORY#>','')                                                
     for sent,dishes in sent_dict.items():
         dishes = list(set(dishes))
         for dish in dishes:
